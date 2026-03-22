@@ -5,42 +5,116 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>لعبة الخلية</title>
 <link rel="stylesheet" href="style.css">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  MAIN MENU                                  -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="main-menu" class="menu-screen">
+
+  <!-- Animated hex canvas background -->
+  <canvas id="menu-canvas"></canvas>
+
+  <!-- Theme toggle top-right -->
+  <button class="menu-theme-btn" id="menu-theme-btn" onclick="toggleTheme()">☀️</button>
+
+  <div class="menu-card" id="menu-card">
+
+    <!-- Logo / Title -->
+    <div class="menu-logo">
+      <div class="menu-hex-icon">⬡</div>
+      <div class="menu-game-name" id="menu-game-name">لعبة الخلية</div>
+      <div class="menu-tagline">استراتيجية الوصل — من يكمل الطريق يفوز</div>
+    </div>
+
+    <div class="menu-divider"></div>
+
+    <!-- Custom game name -->
+    <div class="menu-section">
+      <label class="menu-label">🎮 اسم اللعبة</label>
+      <input class="menu-input" id="game-name-input"
+             placeholder="لعبة الخلية" maxlength="24"
+             oninput="document.getElementById('menu-game-name').textContent = this.value || 'لعبة الخلية'"/>
+    </div>
+
+    <!-- Team names -->
+    <div class="menu-teams-row">
+      <div class="menu-team-col">
+        <label class="menu-label">🟢 الفريق الأول</label>
+        <input class="menu-input team-input-g" id="menu-name-g"
+               placeholder="الفريق الأول" maxlength="16"/>
+      </div>
+      <div class="menu-vs">VS</div>
+      <div class="menu-team-col">
+        <label class="menu-label">🟠 الفريق الثاني</label>
+        <input class="menu-input team-input-o" id="menu-name-o"
+               placeholder="الفريق الثاني" maxlength="16"/>
+      </div>
+    </div>
+
+    <div class="menu-divider"></div>
+
+    <!-- How to play -->
+    <div class="menu-howto" id="howto-wrap">
+      <button class="menu-howto-toggle" onclick="toggleHowto()">
+        <span>📖 كيف تلعب؟</span>
+        <span id="howto-arrow">▼</span>
+      </button>
+      <div class="menu-howto-body" id="howto-body">
+        <div class="howto-item"><span class="howto-dot green-dot"></span><span>الفريق الأخضر 🟢 يوصل من <strong>فوق لتحت</strong></span></div>
+        <div class="howto-item"><span class="howto-dot orange-dot"></span><span>الفريق البرتقالي 🟠 يوصل من <strong>يسار ليمين</strong></span></div>
+        <div class="howto-item"><span class="howto-dot purple-dot"></span><span>اختر فريقك ثم اضغط على خلية لتدّعيها</span></div>
+        <div class="howto-item"><span class="howto-dot yellow-dot"></span><span>أول من يفوز بـ <strong>جولتين</strong> يحسم البطولة 🏆</span></div>
+      </div>
+    </div>
+
+    <!-- Start button -->
+    <button class="menu-start-btn" onclick="startGame()">
+      <span class="start-icon">▶</span>
+      <span>ابدأ اللعبة</span>
+    </button>
+
+    <!-- Version -->
+    <div class="menu-version">v2.0 — لعبة الخلية</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!--  GAME SCREEN                                -->
+<!-- ═══════════════════════════════════════════ -->
+<div id="game-screen" class="game-screen hidden">
 <div class="card">
 
   <!-- Play area -->
   <div class="play" id="play">
     <canvas id="c"></canvas>
-    <!-- Collapse toggle sits on the boundary -->
     <button class="collapse-btn" id="collapse-btn" onclick="toggleSide()">▶</button>
   </div>
 
   <!-- Side panel -->
   <div class="side" id="side">
-
-    <!-- Top toolbar -->
     <div class="side-toolbar">
+      <button class="icon-btn" onclick="goToMenu()" title="القائمة الرئيسية">🏠</button>
       <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="تغيير المظهر">☀️</button>
     </div>
 
+    <div class="game-title-bar" id="game-title-bar">لعبة الخلية</div>
+
     <div class="round-title">الجولة<br><span class="hi" id="rname">الأولى</span></div>
 
-    <!-- Score -->
     <div class="score-row">
       <div class="score-team"><div class="sn" id="sn-g">الفريق الأول</div><div class="sv" id="sv-g">0</div></div>
       <div class="score-vs">جولات</div>
       <div class="score-team"><div class="sn" id="sn-o">الفريق الثاني</div><div class="sv" id="sv-o">0</div></div>
     </div>
 
-    <!-- Turn indicator -->
     <div class="turn-indicator" id="turn-indicator">
       <span class="turn-dot" style="background:#22c55e"></span>
       <span>دور: الفريق الأول</span>
     </div>
 
-    <!-- Team 1 -->
     <input class="tin" id="name-g" value="الفريق الأول" placeholder="اسم الفريق الأول" maxlength="16" oninput="syncNames()"/>
     <button class="tbtn" id="btn-g" onclick="pickTeam('green')">
       <span class="chk" id="chk-g">✓</span>
@@ -48,7 +122,6 @@
       <span class="team-emoji">🟢</span>
     </button>
 
-    <!-- Team 2 -->
     <input class="tin" id="name-o" value="الفريق الثاني" placeholder="اسم الفريق الثاني" maxlength="16" oninput="syncNames()"/>
     <button class="tbtn" id="btn-o" onclick="pickTeam('orange')">
       <span class="chk" id="chk-o">✓</span>
@@ -58,7 +131,6 @@
 
     <div class="divider"></div>
 
-    <!-- Move history -->
     <div class="hist-wrap">
       <div class="hist-title">آخر الحركات</div>
       <div class="hist-list" id="history-list">
@@ -72,6 +144,7 @@
     <button class="ctrl cd" onclick="newGame()">🎮 لعبة جديدة</button>
   </div>
 </div>
+</div><!-- /game-screen -->
 
 <div class="cf-wrap" id="cf"></div>
 
@@ -92,7 +165,10 @@
     <div class="gw-mbr">مبروك الفوز</div>
     <div class="gw-nm" id="gw-nm">الفريق الأول</div>
     <div class="gw-sub" id="gw-sub">فاز بجولتين وحسم البطولة!</div>
-    <button class="gw-b" onclick="newGame()">🎮 لعبة جديدة</button>
+    <div class="gw-btns">
+      <button class="gw-b" onclick="newGame()">🔄 مرة ثانية</button>
+      <button class="gw-b gw-b-menu" onclick="goToMenu()">🏠 القائمة</button>
+    </div>
   </div>
 </div>
 

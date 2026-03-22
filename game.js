@@ -590,16 +590,185 @@ function spawnConfetti() {
   setTimeout(() => wrap.innerHTML='', 6500);
 }
 
+// INIT is handled by the menu's DOMContentLoaded below
+
 // ═══════════════════════════════════════════════════════
-//  INIT — wait for DOM then boot
+//  MENU — animated hex background + screen transitions
 // ═══════════════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
-  build();
+
+let menuAnimId = null;
+let howtoOpen  = false;
+
+function initMenuCanvas() {
+  const mc = document.getElementById('menu-canvas');
+  if (!mc) return;
+  const mctx = mc.getContext('2d');
+  let W, H, hexes = [];
+
+  function resizeMenu() {
+    W = mc.width  = window.innerWidth;
+    H = mc.height = window.innerHeight;
+    buildMenuHexes();
+  }
+
+  function buildMenuHexes() {
+    hexes = [];
+    const r  = 38;
+    const DX = Math.sqrt(3) * r;
+    const DY = 1.5 * r;
+    const cols = Math.ceil(W / DX) + 2;
+    const rows = Math.ceil(H / DY) + 2;
+    for (let row = -1; row < rows; row++) {
+      for (let col = -1; col < cols; col++) {
+        hexes.push({
+          x: col * DX + (row % 2 === 1 ? DX / 2 : 0),
+          y: row * DY,
+          r,
+          phase:  Math.random() * Math.PI * 2,
+          speed:  0.004 + Math.random() * 0.006,
+          baseA:  0.04 + Math.random() * 0.08,
+        });
+      }
+    }
+  }
+
+  function drawMenuFrame() {
+    mctx.clearRect(0, 0, W, H);
+
+    // gradient background
+    const grad = mctx.createLinearGradient(0, 0, W, H);
+    if (isDark) {
+      grad.addColorStop(0,   '#0f0a1e');
+      grad.addColorStop(0.5, '#1a0a3a');
+      grad.addColorStop(1,   '#0a0a1e');
+    } else {
+      grad.addColorStop(0,   '#d4c0f8');
+      grad.addColorStop(0.5, '#e8deff');
+      grad.addColorStop(1,   '#c8b4f0');
+    }
+    mctx.fillStyle = grad;
+    mctx.fillRect(0, 0, W, H);
+
+    const now = performance.now() * 0.001;
+
+    hexes.forEach(h => {
+      const alpha = h.baseA + Math.sin(now * h.speed * 60 + h.phase) * 0.05;
+      const pts = Array.from({ length: 6 }, (_, i) => {
+        const a = (Math.PI / 3) * i + Math.PI / 6;
+        return [h.x + h.r * Math.cos(a), h.y + h.r * Math.sin(a)];
+      });
+
+      // Fill
+      mctx.beginPath();
+      mctx.moveTo(...pts[0]);
+      for (let i = 1; i < 6; i++) mctx.lineTo(...pts[i]);
+      mctx.closePath();
+      mctx.fillStyle = isDark
+        ? `rgba(120,60,255,${alpha})`
+        : `rgba(80,20,180,${alpha * 0.6})`;
+      mctx.fill();
+
+      // Stroke
+      mctx.strokeStyle = isDark
+        ? `rgba(160,100,255,${alpha * 1.4})`
+        : `rgba(100,40,200,${alpha})`;
+      mctx.lineWidth = 0.8;
+      mctx.stroke();
+    });
+
+    menuAnimId = requestAnimationFrame(drawMenuFrame);
+  }
+
+  window.addEventListener('resize', resizeMenu);
+  resizeMenu();
+  drawMenuFrame();
+}
+
+function stopMenuCanvas() {
+  if (menuAnimId) { cancelAnimationFrame(menuAnimId); menuAnimId = null; }
+}
+
+// ── Toggle how-to-play ─────────────────────────────────
+function toggleHowto() {
+  howtoOpen = !howtoOpen;
+  document.getElementById('howto-body').classList.toggle('open', howtoOpen);
+  document.getElementById('howto-arrow').textContent = howtoOpen ? '▲' : '▼';
+}
+
+// ── Start game from menu ───────────────────────────────
+function startGame() {
+  // Read names from menu inputs
+  const gName = document.getElementById('menu-name-g').value.trim() || 'الفريق الأول';
+  const oName = document.getElementById('menu-name-o').value.trim() || 'الفريق الثاني';
+  const gameName = document.getElementById('game-name-input').value.trim() || 'لعبة الخلية';
+
+  // Apply to game
+  document.getElementById('name-g').value = gName;
+  document.getElementById('name-o').value = oName;
+  document.getElementById('game-title-bar').textContent = gameName;
+  document.title = gameName;
+
+  // Show game screen, hide menu
+  const menuEl = document.getElementById('main-menu');
+  const gameEl = document.getElementById('game-screen');
+
+  gameEl.classList.remove('hidden');
+  // Force reflow so transition fires
+  gameEl.offsetHeight;
+  gameEl.classList.add('visible');
+  menuEl.classList.add('fade-out');
+
+  setTimeout(() => {
+    menuEl.style.display = 'none';
+    stopMenuCanvas();
+  }, 500);
+
+  // Boot game
   syncNames();
+  build();
   applyTheme();
   updateTurnIndicator();
   renderHistory();
   window.addEventListener('resize', resize);
   document.fonts.ready.then(() => resize());
   resize();
+}
+
+// ── Return to menu ─────────────────────────────────────
+function goToMenu() {
+  const menuEl = document.getElementById('main-menu');
+  const gameEl = document.getElementById('game-screen');
+
+  menuEl.style.display = '';
+  menuEl.classList.remove('fade-out');
+  gameEl.classList.remove('visible');
+
+  setTimeout(() => {
+    gameEl.classList.add('hidden');
+  }, 500);
+
+  // Restart menu canvas
+  initMenuCanvas();
+  // Update menu theme button
+  const mb = document.getElementById('menu-theme-btn');
+  if (mb) mb.textContent = isDark ? '☀️' : '🌙';
+}
+
+// ── Single init — show menu, don't boot game yet ──────
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme();
+  initMenuCanvas();
+  // Sync menu theme button
+  const mb = document.getElementById('menu-theme-btn');
+  if (mb) mb.textContent = isDark ? '☀️' : '🌙';
 });
+
+// Patch applyTheme to also sync both theme buttons
+const _baseApplyTheme = applyTheme;
+applyTheme = function() {
+  _baseApplyTheme();
+  const mb = document.getElementById('menu-theme-btn');
+  if (mb) mb.textContent = isDark ? '☀️' : '🌙';
+  const tb = document.getElementById('theme-btn');
+  if (tb) tb.textContent = isDark ? '☀️' : '🌙';
+};

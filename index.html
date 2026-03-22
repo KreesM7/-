@@ -11,123 +11,127 @@
 
 <!-- ═══════════════════ MAIN MENU ═══════════════════ -->
 <div id="main-menu" class="menu-screen">
+
+  <!-- Full-screen hex background canvas -->
   <canvas id="menu-canvas"></canvas>
-  <button class="corner-btn corner-theme" id="menu-theme-btn" onclick="toggleTheme()">☀️</button>
 
-  <div class="menu-overlay">
+  <!-- Theme toggle -->
+  <button class="menu-corner-btn" id="menu-theme-btn" onclick="toggleTheme()">☀️</button>
 
-    <!-- Animated logo canvas -->
-    <div class="logo-area"><canvas id="logo-canvas"></canvas></div>
-
-    <div class="menu-card">
-
-      <!-- Game name -->
-      <div class="menu-field">
-        <div class="menu-field-label">اسم اللعبة</div>
-        <input class="menu-input" id="game-name-input"
-               placeholder="لعبة الخلية" maxlength="24"
-               oninput="onGameNameInput(this.value)"/>
-      </div>
-
-      <div class="menu-separator"></div>
-
-      <!-- Teams -->
-      <div class="menu-field-label menu-section-title">إعدادات الفرق</div>
-      <div class="menu-teams-grid">
-
-        <!-- Team A -->
-        <div class="menu-team-block team-block-a">
-          <div class="team-block-header">
-            <span id="preview-color-g" class="team-color-preview" style="background:#4ade80"></span>
-            <span class="team-block-label">الفريق الأول</span>
-            <span class="team-dir-hint">↕ فوق / تحت</span>
-          </div>
-          <input class="menu-input" id="menu-name-g" placeholder="الفريق الأول" maxlength="16"/>
-          <div class="color-row">
-            <label class="color-row-label">لون الفريق</label>
-            <div class="color-swatches" id="swatches-g">
-              <button class="swatch active-swatch" style="background:#4ade80"  onclick="pickSwatch('green','#4ade80',this)"></button>
-              <button class="swatch" style="background:#22c55e"  onclick="pickSwatch('green','#22c55e',this)"></button>
-              <button class="swatch" style="background:#86efac"  onclick="pickSwatch('green','#86efac',this)"></button>
-              <button class="swatch" style="background:#38bdf8"  onclick="pickSwatch('green','#38bdf8',this)"></button>
-              <button class="swatch" style="background:#818cf8"  onclick="pickSwatch('green','#818cf8',this)"></button>
-              <button class="swatch" style="background:#f9e000"  onclick="pickSwatch('green','#f9e000',this)"></button>
-              <button class="swatch" style="background:#ffffff"  onclick="pickSwatch('green','#ffffff',this)"></button>
-              <label class="swatch swatch-custom" title="لون مخصص">
-                <input type="color" id="custom-g" value="#4ade80" oninput="pickCustom('green',this.value)"/>
-                ✏️
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="menu-vs-badge">VS</div>
-
-        <!-- Team B -->
-        <div class="menu-team-block team-block-b">
-          <div class="team-block-header">
-            <span id="preview-color-o" class="team-color-preview" style="background:#fb923c"></span>
-            <span class="team-block-label">الفريق الثاني</span>
-            <span class="team-dir-hint">↔ يسار / يمين</span>
-          </div>
-          <input class="menu-input" id="menu-name-o" placeholder="الفريق الثاني" maxlength="16"/>
-          <div class="color-row">
-            <label class="color-row-label">لون الفريق</label>
-            <div class="color-swatches" id="swatches-o">
-              <button class="swatch active-swatch" style="background:#fb923c"  onclick="pickSwatch('orange','#fb923c',this)"></button>
-              <button class="swatch" style="background:#f97316"  onclick="pickSwatch('orange','#f97316',this)"></button>
-              <button class="swatch" style="background:#fbbf24"  onclick="pickSwatch('orange','#fbbf24',this)"></button>
-              <button class="swatch" style="background:#f43f5e"  onclick="pickSwatch('orange','#f43f5e',this)"></button>
-              <button class="swatch" style="background:#e879f9"  onclick="pickSwatch('orange','#e879f9',this)"></button>
-              <button class="swatch" style="background:#f9e000"  onclick="pickSwatch('orange','#f9e000',this)"></button>
-              <button class="swatch" style="background:#ffffff"  onclick="pickSwatch('orange','#ffffff',this)"></button>
-              <label class="swatch swatch-custom" title="لون مخصص">
-                <input type="color" id="custom-o" value="#fb923c" oninput="pickCustom('orange',this.value)"/>
-                ✏️
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="menu-separator"></div>
-
-      <!-- Rounds to win -->
-      <div class="rounds-row">
-        <div class="rounds-label">
-          <span>عدد الجولات للفوز</span>
-          <span class="rounds-hint">المقدّم يختار</span>
-        </div>
-        <div class="rounds-picker">
-          <button class="rounds-btn" onclick="changeRounds(-1)">−</button>
-          <div class="rounds-val" id="rounds-to-win">2</div>
-          <button class="rounds-btn" onclick="changeRounds(1)">+</button>
-        </div>
-      </div>
-
-      <div class="menu-separator"></div>
-
-      <!-- How to play -->
-      <button class="howto-toggle" onclick="toggleHowto()">
-        <span>كيف تلعب؟</span>
-        <span id="howto-arrow" class="howto-arrow-icon">▼</span>
-      </button>
-      <div class="howto-body" id="howto-body">
-        <div class="howto-row"><span class="hd green-hd"></span><span>الفريق الأول يوصل من <b>فوق لتحت</b></span></div>
-        <div class="howto-row"><span class="hd orange-hd"></span><span>الفريق الثاني يوصل من <b>يسار ليمين</b></span></div>
-        <div class="howto-row"><span class="hd yellow-hd"></span><span>اضغط الخلية: مرة تختار — ثانية للفريق الأول — ثالثة للفريق الثاني — رابعة مسح</span></div>
-        <div class="howto-row"><span class="hd purple-hd"></span><span>المقدّم يعطي النقطة لمن أجاب أسرع — ليس هناك دور محدد</span></div>
-      </div>
-
-      <!-- Start -->
-      <button class="start-btn" onclick="startGame()">
-        <span class="start-btn-text">ابدأ اللعبة</span>
-        <span class="start-btn-arrow">◄</span>
-      </button>
-      <div class="menu-version" id="menu-version">v2.0 — لعبة الخلية</div>
-    </div>
+  <!-- ── ANIMATED CSS LOGO ── -->
+  <div class="menu-logo-area">
+    <span class="logo-word logo-w1" id="logo-w1">لعبة</span>
+    <span class="logo-word logo-w2" id="logo-w2">الخلية</span>
+    <span class="logo-word logo-w3" id="logo-w3"></span>
   </div>
-</div>
+
+  <!-- ── GLASS CARD ── -->
+  <div class="menu-card" id="menu-card">
+
+    <!-- Game name -->
+    <div>
+      <div class="mf-label">اسم اللعبة</div>
+      <input class="mf-input" id="game-name-input"
+             placeholder="لعبة الخلية" maxlength="24"
+             oninput="onGameNameInput(this.value)"/>
+    </div>
+
+    <div class="menu-sep"></div>
+
+    <!-- Teams & Colors -->
+    <div class="mf-label" style="margin-bottom:0">إعدادات الفرق</div>
+    <div class="menu-teams-grid">
+
+      <!-- Team A -->
+      <div class="menu-team-block team-block-a">
+        <div class="team-block-hdr">
+          <span id="preview-color-g" class="team-preview-dot" style="background:#4ade80"></span>
+          <span class="team-block-name">الفريق الأول</span>
+          <span class="team-dir-hint">↕ فوق/تحت</span>
+        </div>
+        <input class="mf-input mf-input-g" id="menu-name-g" placeholder="الفريق الأول" maxlength="16"/>
+        <div class="color-picker-row">
+          <span class="color-row-lbl">اللون</span>
+          <div class="swatches" id="swatches-g">
+            <button class="sw sw-active" style="background:#4ade80" onclick="pickSwatch('green','#4ade80',this)"></button>
+            <button class="sw" style="background:#22c55e" onclick="pickSwatch('green','#22c55e',this)"></button>
+            <button class="sw" style="background:#86efac" onclick="pickSwatch('green','#86efac',this)"></button>
+            <button class="sw" style="background:#38bdf8" onclick="pickSwatch('green','#38bdf8',this)"></button>
+            <button class="sw" style="background:#818cf8" onclick="pickSwatch('green','#818cf8',this)"></button>
+            <button class="sw" style="background:#f9e000" onclick="pickSwatch('green','#f9e000',this)"></button>
+            <button class="sw" style="background:#ffffff" onclick="pickSwatch('green','#ffffff',this)"></button>
+            <label class="sw sw-custom" title="لون مخصص">
+              <input type="color" id="custom-g" value="#4ade80" oninput="pickCustom('green',this.value)"/>✏
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="teams-vs">VS</div>
+
+      <!-- Team B -->
+      <div class="menu-team-block team-block-b">
+        <div class="team-block-hdr">
+          <span id="preview-color-o" class="team-preview-dot" style="background:#fb923c"></span>
+          <span class="team-block-name">الفريق الثاني</span>
+          <span class="team-dir-hint">↔ يسار/يمين</span>
+        </div>
+        <input class="mf-input mf-input-o" id="menu-name-o" placeholder="الفريق الثاني" maxlength="16"/>
+        <div class="color-picker-row">
+          <span class="color-row-lbl">اللون</span>
+          <div class="swatches" id="swatches-o">
+            <button class="sw sw-active" style="background:#fb923c" onclick="pickSwatch('orange','#fb923c',this)"></button>
+            <button class="sw" style="background:#f97316" onclick="pickSwatch('orange','#f97316',this)"></button>
+            <button class="sw" style="background:#fbbf24" onclick="pickSwatch('orange','#fbbf24',this)"></button>
+            <button class="sw" style="background:#f43f5e" onclick="pickSwatch('orange','#f43f5e',this)"></button>
+            <button class="sw" style="background:#e879f9" onclick="pickSwatch('orange','#e879f9',this)"></button>
+            <button class="sw" style="background:#f9e000" onclick="pickSwatch('orange','#f9e000',this)"></button>
+            <button class="sw" style="background:#ffffff" onclick="pickSwatch('orange','#ffffff',this)"></button>
+            <label class="sw sw-custom" title="لون مخصص">
+              <input type="color" id="custom-o" value="#fb923c" oninput="pickCustom('orange',this.value)"/>✏
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-sep"></div>
+
+    <!-- Rounds to win -->
+    <div class="rounds-row">
+      <div class="rounds-labels">
+        <span class="rounds-title">عدد الجولات للفوز</span>
+        <span class="rounds-sub">المقدّم يختار</span>
+      </div>
+      <div class="rounds-picker">
+        <button class="rounds-btn" onclick="changeRounds(-1)">−</button>
+        <span class="rounds-val" id="rounds-to-win">2</span>
+        <button class="rounds-btn" onclick="changeRounds(1)">+</button>
+      </div>
+    </div>
+
+    <div class="menu-sep"></div>
+
+    <!-- How to play -->
+    <button class="howto-btn" onclick="toggleHowto()">
+      <span>كيف تلعب؟</span>
+      <span id="howto-arrow">▼</span>
+    </button>
+    <div class="howto-body" id="howto-body">
+      <div class="howto-row"><span class="hd green-hd"></span><span>الفريق الأول يوصل من <b>فوق لتحت</b></span></div>
+      <div class="howto-row"><span class="hd orange-hd"></span><span>الفريق الثاني يوصل من <b>يسار ليمين</b></span></div>
+      <div class="howto-row"><span class="hd yellow-hd"></span><span>اضغط الخلية: مرة تختار — ثانية فريق١ — ثالثة فريق٢ — رابعة مسح</span></div>
+      <div class="howto-row"><span class="hd purple-hd"></span><span>المقدّم يعطي النقطة لمن أجاب أسرع</span></div>
+    </div>
+
+    <!-- Start -->
+    <button class="menu-start-btn" onclick="startGame()">
+      ابدأ اللعبة ◄
+    </button>
+    <div class="menu-version" id="menu-version">v2.0 — لعبة الخلية</div>
+  </div><!-- /menu-card -->
+</div><!-- /main-menu -->
+
 
 <!-- ═══════════════════ GAME SCREEN ═══════════════════ -->
 <div id="game-screen" class="game-screen hidden">
@@ -140,21 +144,25 @@
   <div class="side" id="side">
     <div class="side-toolbar">
       <button class="icon-btn" onclick="goToMenu()" title="القائمة">⌂</button>
-      <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="المظهر">☀️</button>
+      <button class="icon-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
     </div>
 
-    <div class="game-title-bar" id="game-title-bar">لعبة الخلية</div>
+    <!-- Mini logo -->
+    <div class="side-logo">
+      <span class="side-logo-w1">لعبة</span>
+      <span class="side-logo-w2" id="game-title-bar">الخلية</span>
+    </div>
+
     <div class="round-title">الجولة<br><span class="hi" id="rname">الأولى</span></div>
 
-    <!-- Score with wins-needed indicator -->
     <div class="score-row">
       <div class="score-team">
         <div class="sn" id="sn-g">الفريق الأول</div>
         <div class="sv" id="sv-g">0</div>
       </div>
-      <div class="score-mid">
-        <div class="score-vs-label">جولات</div>
-        <div class="wins-needed-badge">/<span id="wins-needed">2</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;padding:0 4px;">
+        <span class="score-vs">جولات</span>
+        <span style="font-size:.68rem;font-weight:900;color:rgba(255,255,255,.45)">/<span id="wins-needed">2</span></span>
       </div>
       <div class="score-team">
         <div class="sn" id="sn-o">الفريق الثاني</div>
@@ -162,7 +170,6 @@
       </div>
     </div>
 
-    <!-- Team buttons (no turn indicator) -->
     <input class="tin" id="name-g" value="الفريق الأول" placeholder="الفريق الأول" maxlength="16" oninput="syncNames()"/>
     <button class="tbtn" id="btn-g" onclick="pickTeam('green')">
       <span class="chk" id="chk-g">✓</span>
@@ -221,25 +228,25 @@
 
 <script src="game.js"></script>
 <script>
-// Swatch helpers
+// ── Swatch helpers ──
 function pickSwatch(team, color, btn) {
-  const swatchesEl = document.getElementById(`swatches-${team==='green'?'g':'o'}`);
-  swatchesEl.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active-swatch'));
-  btn.classList.add('active-swatch');
+  document.getElementById(`swatches-${team==='green'?'g':'o'}`)
+    .querySelectorAll('.sw').forEach(s=>s.classList.remove('sw-active'));
+  btn.classList.add('sw-active');
   onColorChange(team, color);
 }
 function pickCustom(team, color) {
-  const swatchesEl = document.getElementById(`swatches-${team==='green'?'g':'o'}`);
-  swatchesEl.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active-swatch'));
+  document.getElementById(`swatches-${team==='green'?'g':'o'}`)
+    .querySelectorAll('.sw').forEach(s=>s.classList.remove('sw-active'));
   onColorChange(team, color);
 }
 
-// Rounds picker — directly sets the global winsToWin from game.js
+// ── Rounds picker ──
 let _roundsVal = 2;
 function changeRounds(delta) {
   _roundsVal = Math.max(1, Math.min(10, _roundsVal + delta));
   document.getElementById('rounds-to-win').textContent = _roundsVal;
-  winsToWin = _roundsVal; // sync to game.js global immediately
+  winsToWin = _roundsVal;
 }
 </script>
 </body>

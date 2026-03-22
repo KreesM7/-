@@ -704,3 +704,96 @@ html, body {
 }
 .score-vs-label { font-size:.58rem; color:var(--side-sub); }
 .wins-needed-badge { font-size:.72rem; font-weight:900; color:rgba(255,255,255,.5); }
+
+/* ══════════════════════════════════════════════
+   MENU LAYOUT FIX — logo above scrollable card
+══════════════════════════════════════════════ */
+.menu-screen {
+  /* override: column layout, scroll */
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 0 12px 32px;
+  gap: 0;
+}
+.menu-screen::-webkit-scrollbar { width:3px; }
+.menu-screen::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2); border-radius:2px; }
+
+/* The logo area sits above the card */
+.menu-logo-area {
+  flex-shrink: 0;
+  padding-top: clamp(14px, 3.5vh, 40px);
+  padding-bottom: clamp(6px, 1.5vh, 20px);
+}
+
+/* Card no longer needs max-height — screen scrolls */
+.menu-card {
+  max-height: none !important;
+  flex-shrink: 0;
+}
+
+/* ── NEW HTML class aliases ── */
+
+/* Separator */
+.menu-sep {
+  height:1px; background:rgba(255,255,255,.1); border-radius:1px; flex-shrink:0;
+}
+
+/* Teams grid */
+.menu-teams-grid {
+  display:flex; align-items:stretch; gap:8px;
+}
+
+/* Team block header */
+.team-block-hdr {
+  display:flex; align-items:center; gap:6px; direction:rtl;
+}
+.team-preview-dot {
+  width:13px; height:13px; border-radius:50%; flex-shrink:0;
+  transition:background .2s; box-shadow:0 0 6px currentColor;
+}
+.team-block-name { font-size:.76rem; font-weight:900; color:#fff; flex:1; }
+
+/* VS between teams */
+.teams-vs {
+  font-size:.85rem; font-weight:900;
+  color:rgba(255,255,255,.3); flex-shrink:0;
+  display:flex; align-items:center; padding-bottom:0;
+}
+
+/* Color picker row */
+.color-picker-row { display:flex; flex-direction:column; gap:4px; }
+.color-row-lbl { font-size:.58rem; font-weight:700; color:rgba(255,255,255,.38); }
+
+/* Swatches using new .sw class */
+.swatches {
+  display:flex; flex-wrap:wrap; gap:4px; align-items:center;
+}
+.sw {
+  width:20px; height:20px; border-radius:50%;
+  border:2px solid transparent; cursor:pointer;
+  transition:all .15s; flex-shrink:0; padding:0;
+}
+.sw:hover { transform:scale(1.2); border-color:rgba(255,255,255,.5); }
+.sw-active {
+  border-color:#fff !important;
+  transform:scale(1.22);
+  box-shadow:0 0 0 2px rgba(255,255,255,.3);
+}
+.sw-custom {
+  width:20px; height:20px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.15); font-size:.6rem;
+  cursor:pointer; position:relative; border:2px solid rgba(255,255,255,.25);
+  flex-shrink:0;
+}
+.sw-custom input[type=color] {
+  position:absolute; inset:0; opacity:0; cursor:pointer;
+  width:100%; height:100%; border:none; padding:0;
+}
+
+/* Rounds row aliases */
+.rounds-labels { display:flex; flex-direction:column; gap:1px; }
+.rounds-title  { font-size:.82rem; font-weight:700; color:#fff; }
+.rounds-sub    { font-size:.6rem; color:rgba(255,255,255,.4); }

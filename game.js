@@ -743,75 +743,10 @@ function showWinnerTransition(team, onDone) {
 const _origShowGameWin=showGameWin;
 showGameWin=function(team){ showWinnerTransition(team,()=>_origShowGameWin(team)); };
 
+
 // ═══════════════════════════════════════════════════════
-//  LOGO CANVAS
+//  LOGO — pure CSS animations, JS only swaps text
 // ═══════════════════════════════════════════════════════
-let logoAnimId=null;
-let logoText1='لعبة الخلية', logoText2='';
-
-function onGameNameInput(val) {
-  const v=val.trim();
-  if (!v) { logoText1='لعبة الخلية'; logoText2=''; }
-  else { logoText1='لعبة خلية'; logoText2=v; }
-  const ver=document.getElementById('menu-version');
-  if (ver) ver.textContent=`v2.0 — ${v||'لعبة الخلية'}`;
-}
-
-function initLogoCanvas() {
-  const lc=document.getElementById('logo-canvas');
-  if (!lc) return;
-  const lctx=lc.getContext('2d');
-
-  function drawLogo(ts) {
-    const t=ts*0.001;
-    // Read width from the parent each frame so it stays correct on resize
-    const parent = lc.parentElement;
-    const W = (parent && parent.clientWidth > 0) ? parent.clientWidth : 500;
-    const H = Math.round(W*0.46);
-    if (lc.width!==W || lc.height!==H) { lc.width=W; lc.height=H; }
-    lctx.clearRect(0,0,W,H);
-    const sz1=Math.round(W*0.185);
-    const bob1=Math.sin(t*1.2)*4, bob2=Math.sin(t*1.2+1)*4;
-    drawWord(lctx,logoText1,W/2,H*(logoText2?0.32:0.52)+bob1,sz1,'#f9e000','#8a5a00',t);
-    if (logoText2) {
-      const sz2=Math.min(Math.round(W*0.165), Math.round(W*3/(logoText2.length+1)));
-      drawWord(lctx,logoText2,W/2,H*0.78+bob2,sz2,'#ff4444','#6a0000',t);
-    }
-    logoAnimId=requestAnimationFrame(drawLogo);
-  }
-
-  if (logoAnimId) cancelAnimationFrame(logoAnimId);
-  // Defer one frame so the DOM has laid out and clientWidth is real
-  requestAnimationFrame(()=>{ logoAnimId=requestAnimationFrame(drawLogo); });
-}
-
-function drawWord(ctx, text, cx, cy, size, fillColor, shadowColor, t) {
-  ctx.save();
-  ctx.font=`900 ${size}px Cairo, sans-serif`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  for (let i=6;i>=1;i--) {
-    ctx.fillStyle=shadowColor; ctx.globalAlpha=0.15+(6-i)*0.06;
-    ctx.fillText(text,cx+i*1.4,cy+i*1.8);
-  }
-  ctx.globalAlpha=1;
-  const grad=ctx.createLinearGradient(cx-size*2,cy-size*.6,cx+size*2,cy+size*.6);
-  const sh=(Math.sin(t*1.8)+1)/2;
-  if (fillColor==='#f9e000') {
-    grad.addColorStop(0,'#ffe566'); grad.addColorStop(sh*.5,'#fff176');
-    grad.addColorStop(sh,'#ffffff'); grad.addColorStop(Math.min(sh+.15,1),'#ffd600'); grad.addColorStop(1,'#e6ac00');
-  } else {
-    grad.addColorStop(0,'#ff6b6b'); grad.addColorStop(sh*.5,'#ff8a80');
-    grad.addColorStop(sh,'#ffcdd2'); grad.addColorStop(Math.min(sh+.15,1),'#f44336'); grad.addColorStop(1,'#b71c1c');
-  }
-  ctx.fillStyle=grad; ctx.fillText(text,cx,cy);
-  ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=size*0.04; ctx.lineJoin='round';
-  ctx.strokeText(text,cx,cy);
-  ctx.restore();
-}
-
-function stopLogoCanvas() {
-  if (logoAnimId) { cancelAnimationFrame(logoAnimId); logoAnimId=null; }
-}
 
 // ═══════════════════════════════════════════════════════
 //  MENU BACKGROUND
@@ -858,12 +793,10 @@ function initMenuCanvas() {
   }
   window.addEventListener('resize',resizeMenu);
   resizeMenu(); drawMenuFrame();
-  initLogoCanvas();
 }
 
 function stopMenuCanvas() {
-  if (menuAnimId)  { cancelAnimationFrame(menuAnimId);  menuAnimId=null; }
-  if (logoAnimId)  { cancelAnimationFrame(logoAnimId);  logoAnimId=null; }
+  if (menuAnimId) { cancelAnimationFrame(menuAnimId); menuAnimId = null; }
 }
 
 function toggleHowto() {

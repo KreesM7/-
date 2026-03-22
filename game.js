@@ -115,50 +115,57 @@ function toggleTheme() {
 }
 
 // ═══════════════════════════════════════════════════════
-//  AUDIO  — resumed on first user gesture
+//  AUDIO
+//  Rules:
+//   1. Create AudioContext lazily on first user gesture
+//   2. Always await resume() before scheduling any nodes
+//      (browsers suspend the context until a gesture fires)
 // ═══════════════════════════════════════════════════════
 let ac = null;
 
-function ensureAC() {
-  if (!ac) {
-    const Ctor = window.AudioContext || window.webkitAudioContext;
-    if (!Ctor) return null;
-    ac = new Ctor();
-  }
-  // Resume if suspended (browser autoplay policy)
-  if (ac.state === 'suspended') ac.resume();
-  return ac;
+// Call this inside every click/touch handler BEFORE playing sound.
+// Returns a Promise that resolves once the context is running.
+function unlockAudio() {
+  const Ctor = window.AudioContext || window.webkitAudioContext;
+  if (!Ctor) return Promise.resolve(null);
+  if (!ac) ac = new Ctor();
+  if (ac.state === 'running') return Promise.resolve(ac);
+  return ac.resume().then(() => ac);
 }
 
 function playClick(team) {
-  const a = ensureAC(); if (!a) return;
-  try {
-    const o = a.createOscillator(), g = a.createGain();
-    o.connect(g); g.connect(a.destination);
-    o.type = 'sine';
-    const now = a.currentTime;
-    o.frequency.setValueAtTime(team === 'green' ? 520 : 400, now);
-    o.frequency.exponentialRampToValueAtTime(team === 'green' ? 780 : 600, now + 0.1);
-    g.gain.setValueAtTime(0.2, now);
-    g.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-    o.start(now); o.stop(now + 0.22);
-  } catch(e) {}
+  unlockAudio().then(a => {
+    if (!a) return;
+    try {
+      const o = a.createOscillator(), g = a.createGain();
+      o.connect(g); g.connect(a.destination);
+      o.type = 'sine';
+      const now = a.currentTime;
+      o.frequency.setValueAtTime(team === 'green' ? 520 : 400, now);
+      o.frequency.exponentialRampToValueAtTime(team === 'green' ? 800 : 620, now + 0.1);
+      g.gain.setValueAtTime(0.22, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+      o.start(now); o.stop(now + 0.22);
+    } catch(e) {}
+  });
 }
 
 function playWin() {
-  const a = ensureAC(); if (!a) return;
-  try {
-    [523, 659, 784, 1047].forEach((freq, i) => {
-      const o = a.createOscillator(), g = a.createGain();
-      o.connect(g); g.connect(a.destination);
-      o.type = 'triangle'; o.frequency.value = freq;
-      const t = a.currentTime + i * 0.14;
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.25, t + 0.04);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.42);
-      o.start(t); o.stop(t + 0.42);
-    });
-  } catch(e) {}
+  unlockAudio().then(a => {
+    if (!a) return;
+    try {
+      [523, 659, 784, 1047].forEach((freq, i) => {
+        const o = a.createOscillator(), g = a.createGain();
+        o.connect(g); g.connect(a.destination);
+        o.type = 'triangle'; o.frequency.value = freq;
+        const t = a.currentTime + i * 0.14;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.26, t + 0.05);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.45);
+        o.start(t); o.stop(t + 0.45);
+      });
+    } catch(e) {}
+  });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -397,13 +404,13 @@ cv.addEventListener('mousemove', e => {
 });
 cv.addEventListener('mouseleave', () => { hovId = null; draw(); });
 cv.addEventListener('click', e => {
-  ensureAC(); // unlock audio on first click
+  unlockAudio(); // pre-warm on first click
   const {px,py} = sxy(e), cell = cellAt(px,py);
   if (!cell) return; onCell(cell.id);
 });
 cv.addEventListener('touchend', e => {
   e.preventDefault();
-  ensureAC();
+  unlockAudio();
   const {px,py} = sxy(e), cell = cellAt(px,py);
   if (!cell) return; onCell(cell.id);
 }, { passive:false });
@@ -412,7 +419,7 @@ cv.addEventListener('touchend', e => {
 //  GAME LOGIC
 // ═══════════════════════════════════════════════════════
 function pickTeam(t) {
-  ensureAC();
+  unlockAudio();
   pendingTeam = t;
   document.getElementById('btn-g').classList.toggle('active', t==='green');
   document.getElementById('btn-o').classList.toggle('active', t==='orange');
@@ -552,15 +559,17 @@ function showGameWin(team) {
 function nextRound() {
   document.getElementById('ov-r').classList.remove('show');
   rNum++;
-  document.getElementById('rname').textContent = RN[rNum]||rNum;
-  build(); clearSt();
+  const label = RN[rNum] || rNum;
+  document.getElementById('rname').textContent = label;
+  showRoundTransition(label, () => { build(); clearSt(); });
 }
 
 function newRound() {
   document.getElementById('ov-r').classList.remove('show');
   rNum++;
-  document.getElementById('rname').textContent = RN[rNum]||rNum;
-  build(); clearSt();
+  const label = RN[rNum] || rNum;
+  document.getElementById('rname').textContent = label;
+  showRoundTransition(label, () => { build(); clearSt(); });
 }
 
 function newGame() {
@@ -697,6 +706,7 @@ function toggleHowto() {
 
 // ── Start game from menu ───────────────────────────────
 function startGame() {
+  unlockAudio(); // unlock on the first real button press
   // Read names from menu inputs
   const gName = document.getElementById('menu-name-g').value.trim() || 'الفريق الأول';
   const oName = document.getElementById('menu-name-o').value.trim() || 'الفريق الثاني';
@@ -772,3 +782,93 @@ applyTheme = function() {
   const tb = document.getElementById('theme-btn');
   if (tb) tb.textContent = isDark ? '☀️' : '🌙';
 };
+
+// ═══════════════════════════════════════════════════════
+//  ROUND TRANSITION ANIMATION
+//  Full-screen cinematic that plays between rounds
+// ═══════════════════════════════════════════════════════
+
+function showRoundTransition(roundName, onDone) {
+  // Remove any existing transition
+  const old = document.getElementById('round-transition');
+  if (old) old.remove();
+
+  const el = document.createElement('div');
+  el.id = 'round-transition';
+  el.innerHTML = `
+    <div class="rt-bg"></div>
+    <div class="rt-hexes" id="rt-hexes"></div>
+    <div class="rt-content">
+      <div class="rt-label" id="rt-label">الجولة</div>
+      <div class="rt-number" id="rt-number">${roundName}</div>
+      <div class="rt-dots">
+        <span class="rt-dot"></span>
+        <span class="rt-dot"></span>
+        <span class="rt-dot"></span>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(el);
+
+  // Spawn floating hex decorations
+  const hexWrap = el.querySelector('#rt-hexes');
+  const hexChars = ['⬡','⬢','⬡','⬢','⬡'];
+  for (let i = 0; i < 18; i++) {
+    const h = document.createElement('span');
+    h.className = 'rt-hex-deco';
+    h.textContent = hexChars[i % hexChars.length];
+    h.style.cssText = `
+      left:${Math.random()*100}vw;
+      top:${Math.random()*100}vh;
+      font-size:${1.5 + Math.random()*4}rem;
+      animation-delay:${Math.random()*0.4}s;
+      animation-duration:${0.6 + Math.random()*0.5}s;
+      opacity:0;
+      color:${['#f9e000','#a855f7','rgba(255,255,255,0.18)','#fb923c'][i%4]};
+    `;
+    hexWrap.appendChild(h);
+  }
+
+  // Play a rising "whoosh" sound
+  unlockAudio().then(a => {
+    if (!a) return;
+    try {
+      // Deep boom
+      const o1 = a.createOscillator(), g1 = a.createGain();
+      o1.connect(g1); g1.connect(a.destination);
+      o1.type = 'sine';
+      o1.frequency.setValueAtTime(80, a.currentTime);
+      o1.frequency.exponentialRampToValueAtTime(200, a.currentTime + 0.3);
+      g1.gain.setValueAtTime(0.35, a.currentTime);
+      g1.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.5);
+      o1.start(a.currentTime); o1.stop(a.currentTime + 0.5);
+
+      // Rising whoosh
+      const o2 = a.createOscillator(), g2 = a.createGain();
+      o2.connect(g2); g2.connect(a.destination);
+      o2.type = 'sawtooth';
+      o2.frequency.setValueAtTime(200, a.currentTime + 0.1);
+      o2.frequency.exponentialRampToValueAtTime(900, a.currentTime + 0.55);
+      g2.gain.setValueAtTime(0.08, a.currentTime + 0.1);
+      g2.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.55);
+      o2.start(a.currentTime + 0.1); o2.stop(a.currentTime + 0.55);
+
+      // Sparkle ting
+      [1200, 1500, 1800].forEach((f, i) => {
+        const o = a.createOscillator(), g = a.createGain();
+        o.connect(g); g.connect(a.destination);
+        o.type = 'sine'; o.frequency.value = f;
+        const t = a.currentTime + 0.3 + i * 0.08;
+        g.gain.setValueAtTime(0.12, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+        o.start(t); o.stop(t + 0.25);
+      });
+    } catch(e) {}
+  });
+
+  // Auto-dismiss after 2.4s then call onDone
+  setTimeout(() => {
+    el.classList.add('rt-exit');
+    setTimeout(() => { el.remove(); onDone(); }, 600);
+  }, 2200);
+}

@@ -252,12 +252,13 @@ function draw() {
   drawBackground();
   cells.forEach(cell=>{
     const {x,y}=cxy(cell.row,cell.col);
-    const isSel=selId===cell.id;
     const isHov=hovId===cell.id;
     const BORDER=R*0.13;
+    // What will next click do — for hover preview
     const nextStep=!pendingTeam&&isHov?(
-        (!cell.owner&&!isSel)?'select':(isSel&&!cell.owner)?'green'
-      :cell.owner==='green'?'orange':cell.owner==='orange'?'clear':null):null;
+        !cell.owner?'green'
+      :cell.owner==='green'?'orange'
+      :cell.owner==='orange'?'clear':null):null;
     // outer border
     const outerC=pointyCorners(x,y,R);
     ctx.beginPath();ctx.moveTo(...outerC[0]);for(let i=1;i<6;i++)ctx.lineTo(...outerC[i]);ctx.closePath();
@@ -269,9 +270,7 @@ function draw() {
     let fill;
     if(cell.owner==='green') fill=teamFill.green;
     else if(cell.owner==='orange') fill=teamFill.orange;
-    else if(isSel) fill='#fde047';
     else if(pendingTeam&&isHov) fill=pendingTeam==='green'?lighten(teamFill.green,.6):lighten(teamFill.orange,.6);
-    else if(nextStep==='select') fill='#fffde7';
     else if(nextStep==='green') fill=lighten(teamFill.green,.6);
     else if(nextStep==='orange') fill=lighten(teamFill.orange,.6);
     else if(nextStep==='clear') fill='#ffe4e4';
@@ -279,7 +278,7 @@ function draw() {
     ctx.fillStyle=fill;ctx.fill();
     // hover ring + dot
     if(nextStep&&!pendingTeam){
-      const dc=nextStep==='select'?'#fde047':nextStep==='green'?teamFill.green:nextStep==='orange'?teamFill.orange:'#ef4444';
+      const dc=nextStep==='green'?teamFill.green:nextStep==='orange'?teamFill.orange:'#ef4444';
       ctx.beginPath();ctx.moveTo(...outerC[0]);for(let i=1;i<6;i++)ctx.lineTo(...outerC[i]);ctx.closePath();
       ctx.strokeStyle=dc;ctx.lineWidth=R*.06;ctx.globalAlpha=.55;ctx.stroke();ctx.globalAlpha=1;
       ctx.beginPath();ctx.arc(x+R*.5,y-R*.55,R*.13+1.5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
@@ -430,14 +429,12 @@ function onCell(id){
   if(pendingTeam){doAssign(id,pendingTeam);clearSt();return;}
   const cell=cells.find(c=>c.id===id);
   if(!cell) return;
-  // reveal mode: first click reveals, second click starts cycle
+  // reveal mode: first click reveals
   if(revealMode&&!cell.revealed&&!cell.owner){
     cell.revealed=true;playSelectSound();draw();return;
   }
-  if(!cell.owner&&selId!==id){
-    selId=id;playSelectSound();draw();
-  } else if(selId===id&&!cell.owner){
-    selId=null;doAssign(id,'green');
+  if(!cell.owner){
+    doAssign(id,'green');
   } else if(cell.owner==='green'){
     doAssign(id,'orange');
   } else if(cell.owner==='orange'){

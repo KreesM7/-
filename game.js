@@ -1061,7 +1061,6 @@ function onColorChange(team,hex){
 // ══════════════════════════════════════════════════════
 function startGame(){
   unlockAudio();
-  initCanvas();
   // Apply grid size
   ROWS = gridSize; COLS = gridSize;
   const gName=document.getElementById('menu-name-g').value.trim()||'الفريق الأول';
@@ -1082,7 +1081,11 @@ function startGame(){
   document.title=gameName;
   const menuEl=document.getElementById('main-menu');
   const gameEl=document.getElementById('game-screen');
-  gameEl.classList.remove('hidden');gameEl.offsetHeight;gameEl.classList.add('visible');
+  // MUST remove 'hidden' (display:none) BEFORE initCanvas so getElementById('c') works
+  gameEl.classList.remove('hidden');
+  gameEl.offsetHeight; // force reflow
+  gameEl.classList.add('visible');
+  initCanvas(); // canvas is now in the DOM and visible
   menuEl.classList.add('fade-out');
   setTimeout(()=>{menuEl.style.display='none';stopMenuCanvas();},500);
   syncNames();build();applyTheme();renderHistory();

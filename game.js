@@ -5,7 +5,7 @@
 const ALL_LETTERS = [...'ابتثجحخدذرزسشصضطظعغفقكلمنهوي'];
 // 28 unique Arabic letters — enough for up to 5×5 (25 cells) without repeats.
 // For 6×6 (36) or 7×7 (49) we extend with digraphs so EVERY cell stays unique.
-const FULL_POOL = [...ALL_LETTERS, ...DIGRAPHS]; // 48 items — covers up to 7×7 (49)
+const FULL_POOL = [...ALL_LETTERS]; // 48 items — covers up to 7×7 (49)
 
 var ROWS = 5, COLS = 5;
 var gridSize = 5;
@@ -219,8 +219,7 @@ function build() {
   }
   pool = pool.slice(0, needed);
     const FULL_POOL = [...]; // Define FULL_POOL based on requirements
-    const ALL_LETTERS = [...]; // Define ALL_LETTERS based on requirements
-    const DIGRAPHS = [...]; // Define DIGRAPHS based on requirements
+    const ALL_LETTERS = [...]; // Define ALL_LETTERS based on requirement
 
   cells = [];
   let i = 0;
@@ -228,7 +227,7 @@ function build() {
     for (let c = 0; c < COLS; c++)
       cells.push({id:`${r}_${c}`,row:r,col:c,letter:pool[i],cellIndex:i+1,owner:null,revealed:!revealMode}), i++;
     // Initialize the pool with unique letters and digraphs
-    let pool = [...FULL_POOL, ...ALL_LETTERS, ...DIGRAPHS];
+    let pool = [...FULL_POOL, ...ALL_LETTERS];
 
   moveHistory=[];moveNum=0;undoStack=[];roundEnded=false;selId=null;
   claimCount={green:0,orange:0};

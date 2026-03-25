@@ -1,11 +1,12 @@
-
+// ═══════════════════════════════════════════════════════
 //  لعبة الخلية — Full Featured Version
 // ═══════════════════════════════════════════════════════
 
 const ALL_LETTERS = [...'ابتثجحخدذرزسشصضطظعغفقكلمنهوي'];
 // 28 unique Arabic letters — enough for up to 5×5 (25 cells) without repeats.
 // For 6×6 (36) or 7×7 (49) we extend with digraphs so EVERY cell stays unique.
-const FULL_POOL = [...ALL_LETTERS]; // 48 items — covers up to 7×7 (49)
+const DIGRAPHS = ['شد','طن','قر','فز','خل','حم','غب','سك','صو','ضي','ظث','ذع','تج','نه','رب','وأ','يإ','ءآ','لا','مد'];
+const FULL_POOL = [...ALL_LETTERS, ...DIGRAPHS]; // 48 items — covers up to 7×7 (49)
 
 var ROWS = 5, COLS = 5;
 var gridSize = 5;
@@ -218,16 +219,12 @@ function build() {
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
   pool = pool.slice(0, needed);
-    const FULL_POOL = [...]; // Define FULL_POOL based on requirements
-    const ALL_LETTERS = [...]; // Define ALL_LETTERS based on requirement
 
   cells = [];
   let i = 0;
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
       cells.push({id:`${r}_${c}`,row:r,col:c,letter:pool[i],cellIndex:i+1,owner:null,revealed:!revealMode}), i++;
-    // Initialize the pool with unique letters and digraphs
-    let pool = [...FULL_POOL, ...ALL_LETTERS];
 
   moveHistory=[];moveNum=0;undoStack=[];roundEnded=false;selId=null;
   claimCount={green:0,orange:0};
@@ -313,10 +310,6 @@ function draw() {
       const dc=nextStep==='select'?'#fde047':nextStep==='green'?teamFill.green:nextStep==='orange'?teamFill.orange:'#ef4444';
       ctx.beginPath();ctx.moveTo(...outerC[0]);for(let i=1;i<6;i++)ctx.lineTo(...outerC[i]);ctx.closePath();
       ctx.strokeStyle=dc;ctx.lineWidth=R*.05;ctx.globalAlpha=.5;ctx.stroke();ctx.globalAlpha=1;
-    // Fisher-Yates shuffle algorithm
-    for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]]; // Swap elements
     }
 
     if(isSel){
@@ -1396,12 +1389,8 @@ function showPowerToast(msg, duration = 3000) {
   requestAnimationFrame(() => el.classList.add('pt-show'));
   setTimeout(() => { el.classList.remove('pt-show'); setTimeout(() => el.remove(), 400); }, duration);
 }
-    // Ensure unique non-repeating letters on the board
-    let uniquePool = [...new Set(pool)];
 
 function isShielded(cellId) { return shieldedCells.has(cellId); }
-    // Logic for placing letters on the board ensuring no duplicates across cells
-    const board = uniquePool.slice(0, targetSize); // targetSize defined by number of cells
 
 function resetPowers() {
   heldPowers = { green: null, orange: null };
@@ -1411,6 +1400,4 @@ function resetPowers() {
   powerPickMode = null;
   updatePowerBadges();
   updateFreezeUI();
-}
-    return board;
 }

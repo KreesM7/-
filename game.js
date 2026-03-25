@@ -330,15 +330,8 @@ function draw() {
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.shadowOffsetY=0;
 
-    if(isSel){
-      // SELECTED: hide the letter — just show the filled hex
-      // (no text drawn)
-    } else if(cell.owner){
-      // Owned: bright white letter with soft shadow
-      ctx.fillStyle='rgba(255,255,255,.95)';
-      ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=4; ctx.shadowOffsetY=1;
-      ctx.fillText(letter,x,y+fs*.04);
-      ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+    if(isSel || cell.owner){
+      // SELECTED or OWNED: letter hidden — clean solid colour fill only
     } else if(showQuestion){
       ctx.fillStyle='rgba(255,255,255,.3)';
       ctx.fillText(letter,x,y+fs*.04);

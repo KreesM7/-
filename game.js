@@ -232,7 +232,7 @@ function build() {
 
   moveHistory=[];moveNum=0;undoStack=[];roundEnded=false;selId=null;
   claimCount={green:0,orange:0};
-  if(powersMode) resetPowers();
+  // resetPowers disabled
   setTimeout(()=>renderHistory(),0);
 }
 
@@ -305,10 +305,7 @@ function draw() {
     else                           fill='#f5f3ff';
     ctx.fillStyle=fill; ctx.fill();
 
-    if(shieldedCells.has(cell.id)){
-      ctx.beginPath();ctx.moveTo(...outerC[0]);for(let i=1;i<6;i++)ctx.lineTo(...outerC[i]);ctx.closePath();
-      ctx.strokeStyle='#38bdf8';ctx.lineWidth=R*.05;ctx.globalAlpha=.75;ctx.stroke();ctx.globalAlpha=1;
-    }
+    // Shield draw disabled
 
     if(nextStep&&!pendingTeam){
       const dc=nextStep==='select'?'#fde047':nextStep==='green'?teamFill.green:nextStep==='orange'?teamFill.orange:'#ef4444';
@@ -448,11 +445,7 @@ function onCell(id){
 
 function doAssign(id,team){
   if(roundEnded) return;
-  if(powerPickMode){ handlePowerPick(id); return; }
-  const cellCheck=cells.find(c=>c.id===id);
-  if(cellCheck&&cellCheck.owner&&cellCheck.owner!==team&&shieldedCells.has(id)){
-    showPowerToast(`🛡️ هذه الخلية محمية من ${names[cellCheck.owner]}!`); return;
-  }
+  // Powers disabled — powerPickMode and shield checks skipped
   const cell=cells.find(c=>c.id===id);
   if(!cell){clearSt();draw();return;}
   undoStack.push({id,prevOwner:cell.owner});
@@ -465,10 +458,7 @@ function doAssign(id,team){
     moveNum++;
     moveHistory.unshift({team,letter:cell.letter,num:moveNum,action:'claim'});
     if(moveHistory.length>8) moveHistory.pop();
-    if(powersMode && !roundEnded){
-      claimCount[team]++;
-      if(claimCount[team] % 3 === 0) setTimeout(()=>triggerPowerSpin(team), 420);
-    }
+    // Powers disabled — no spin trigger
   } else if(wasOwned!==team){
     moveHistory.unshift({team,letter:cell.letter,num:'↺',action:'change',from:wasOwned});
     if(moveHistory.length>8) moveHistory.pop();
@@ -1129,6 +1119,9 @@ function startGame(){
   menuEl.classList.add('fade-out');
   setTimeout(()=>{menuEl.style.display='none';stopMenuCanvas();},500);
   syncNames();build();applyTheme();renderHistory();
+  // Hide powers UI
+  const bb=document.getElementById('block-bar');if(bb)bb.style.display='none';
+  updatePowerBadges();
   window.addEventListener('resize',resize);
   document.fonts.ready.then(()=>{ resize(); if(typeof applyLayout==='function') applyLayout(); });
   resize(); updateScore();
@@ -1157,11 +1150,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   setTimeout(()=>initMenuCanvas(),50);
 });
 
-var powersMode = false;
+// ── Powers mode disabled (temporarily) ──
+var powersMode = false;          // DISABLED — set to false permanently for now
 var heldPowers = { green: null, orange: null };
-var shieldedCells = new Set();
+var shieldedCells = new Set();   // always empty while disabled
 var blockedTeam = null;
-var powerPickMode = null;
+var powerPickMode = null;        // always null while disabled
 
 const POWERS = [
   { id:'shield',  emoji:'🛡️', name:'درع',     color:'#38bdf8',
@@ -1365,21 +1359,14 @@ function doShuffle(team) {
 }
 
 function updateFreezeUI() {
-  const gBtn = document.getElementById('btn-g');
-  const oBtn = document.getElementById('btn-o');
-  if (gBtn) gBtn.classList.toggle('frozen-btn', frozenTeam === 'green');
-  if (oBtn) oBtn.classList.toggle('frozen-btn', frozenTeam === 'orange');
+  // Disabled
 }
 
 function updatePowerBadges() {
-  ['green','orange'].forEach(t => {
-    const badge = document.getElementById(`power-badge-${t === 'green' ? 'g' : 'o'}`);
-    if (!badge) return;
-    const p = heldPowers[t];
-    badge.textContent = p ? p.emoji : '';
-    badge.title = p ? `${p.name}: ${p.desc}` : '';
-    badge.style.display = p ? 'flex' : 'none';
-    badge.onclick = () => { if (p) activatePower(t, p.id, true); };
+  // Powers disabled — hide all badges
+  ['g','o'].forEach(id => {
+    const badge = document.getElementById('power-badge-' + id);
+    if (badge) badge.style.display = 'none';
   });
 }
 

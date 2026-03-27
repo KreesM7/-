@@ -701,3 +701,10 @@ html,body{width:100vw;height:100vh;overflow:hidden;font-family:'Tajawal',sans-se
   .tbtn,.tin,.ctrl{font-size:.9rem;}
   .icon-btn,.tool-btn{font-size:1.1rem;}
 }
+
+/* ══ POWERS MODE — temporarily disabled ════════════════ */
+#gm-powers,
+.power-badge,
+#block-bar,
+#power-spin,
+#power-toast { display: none !important; }
